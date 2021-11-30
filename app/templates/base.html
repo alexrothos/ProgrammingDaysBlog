@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% if title %}
+        <title>{{ title }} <i> - ProgDays</i></title>
+        {% else %}
         <title>A blog about my programming day!</title>
+        {% endif %}
     </head>
     <body>
         {% block content %}{% endblock %}
