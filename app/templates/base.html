@@ -10,9 +10,19 @@
     <body>
         <div>
             # Programming Days Blog # 
-            <a href="/index"> @Home Page</a>
-            <a href="/login"> @Student Login</a>
+            <a href="{{ url_for('index') }}"> @Home Page</a>
+            <a href="{{ url_for('login') }}"> @Student Login</a>
         </div>
+        <hr>
+        {% with messages = get_flashed_messages() %} 
+        {% if messages %} 
+        <ul>
+            {% for message in messages %} 
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %} 
+        {% endwith %}
         {% block content %}{% endblock %}
     </body>
 </html>
