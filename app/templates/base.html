@@ -11,7 +11,11 @@
         <div>
             # Programming Days Blog # 
             <a href="{{ url_for('index') }}"> @Home Page</a>
+            {% if current_user.is_anonymous %}
             <a href="{{ url_for('login') }}"> @Student Login</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}">Student Logout</a>
+            {% endif %}
         </div>
         <hr>
         {% with messages = get_flashed_messages() %} 
