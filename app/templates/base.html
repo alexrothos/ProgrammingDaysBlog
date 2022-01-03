@@ -11,11 +11,12 @@
         <div>
             # Programming Days Blog # 
             <a href="{{ url_for('index') }}"> @Home Page</a>
+            <a href="{{ url_for('explore') }}">@Explore</a>
             {% if current_user.is_anonymous %}
             <a href="{{ url_for('login') }}"> @Student Login</a>
             {% else %}
-            <a href="{{ url_for('user', username=current_user.username) }}">Student Profile</a>
-            <a href="{{ url_for('logout') }}">Student Logout</a>
+            <a href="{{ url_for('user', username=current_user.username) }}">@Student Profile</a>
+            <a href="{{ url_for('logout') }}">@Student Logout</a>
             {% endif %}
         </div>
         <hr>
