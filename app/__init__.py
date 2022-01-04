@@ -1,3 +1,11 @@
+# TODO - Proper way to import
+# import something
+# (blank line)
+# from outside_package (e.g. flask) import something
+# from outside_package2 (e.g. flask) import something2
+# (blank line)
+# from inside (e.g. models) import something
+
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
@@ -7,14 +15,20 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
+# TODO - Never put your comments on the right side.
+# TODO - Always try to keep small amount per characters for line.
 app = Flask(__name__)                # creation of application
 app.config.from_object(Config)       # connection with the configuration file
 db = SQLAlchemy(app)                 # define the database, app.db in root folder
+
+# TODO - You are using Migrate. Are you sure you have to
+# also have your migrations inside the repo?
 migrate = Migrate(app, db)
 login = LoginManager(app)            # starting the login validation process
 login.login_view = 'login'           # the LoginManager, named login now, manage the view for user not yet logged in, so they redirect to login page and back after the succesful log, the name 'login' is entering in a url_for
 
 if not app.debug:
+    # TODO - Let's leave for now the mail server.
     if app.config['MAIL_SERVER']:
         auth = None
         if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
@@ -26,6 +40,8 @@ if not app.debug:
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler) 
     
+    # TODO - use logging without file_handler. On production
+    # docker will handle this not flask
     if not os.path.exists('logs'):
         os.mkdir('logs')
     file_handler = RotatingFileHandler('logs/progday.log', maxBytes=10240, backupCount=10)
@@ -33,7 +49,12 @@ if not app.debug:
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 
+    # TODO - Maybe the level of logging
+    # is good if it was set up according to
+    # app.debug
     app.logger.setLevel(logging.INFO)
+
+    # TODO - No need of this for REST
     app.logger.info('ProgDay startup')
 
 from app import routes, models, errors               # import the main navigation control for the app

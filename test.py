@@ -3,6 +3,7 @@ import unittest
 from app import app, db
 from app.models import User, Post
 
+# TODO - move this inside app folder
 class UserModelCase(unittest.TestCase):
     def setUp(self):
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'

@@ -12,6 +12,10 @@ def load_user(id):
 
 
 class User(UserMixin, db.Model):
+    # TODO - Define __schema__ class
+    # TODO - Create base model and inheritt to all models
+    # id is a common field for every new model. You don't
+    # have to create it every time.
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -25,7 +29,7 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
+    # TODO - put repr right after the variables.
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -34,6 +38,7 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
     
+    # TODO - this is an attribute put it with the others
     followed = db.relationship('User', secondary=followers, primaryjoin=(followers.c.follower_id == id), secondaryjoin=(followers.c.followed_id == id), backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
     def follow(self, user):
@@ -52,11 +57,13 @@ class User(UserMixin, db.Model):
         own = Post.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 
+    # TODO - Maybe you have to create find_by_id method? To find a user in db?
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # TODO - ids-foreign_keys then all the other attributes
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
