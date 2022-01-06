@@ -5,3 +5,4 @@ __pycache__
 .vscode
 app/__pycache__
 .flaskenv
+app.db
