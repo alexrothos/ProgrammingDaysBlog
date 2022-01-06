@@ -1,8 +1,7 @@
-/venv
-/logs
-/migrations
-/__pycache__
-/.vscode
-/app/__pycache__
+venv
+logs
+migrations
+__pycache__
+.vscode
+app/__pycache__
 .flaskenv
-_config.yml
