@@ -1,6 +1,9 @@
 from flask_wtf import FlaskForm
+
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length
+
 from app.models import User
 
 # TODO - As a restful app we have to use Marshmellow and Serializers not Forms.
