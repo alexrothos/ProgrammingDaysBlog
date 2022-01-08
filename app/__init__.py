@@ -1,31 +1,41 @@
-# TODO - Proper way to import
-# import something
-# (blank line)
-# from outside_package (e.g. flask) import something
-# from outside_package2 (e.g. flask) import something2
-# (blank line)
-# from inside (e.g. models) import something
-
 from flask import Flask
+
 from config import Config
+
+from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
+
 import os
 
-# TODO - Never put your comments on the right side.
-# TODO - Always try to keep small amount per characters for line.
-app = Flask(__name__)                # creation of application
-app.config.from_object(Config)       # connection with the configuration file
-db = SQLAlchemy(app)                 # define the database, app.db in root folder
+# creation of application
+app = Flask(__name__)
+
+# connection with the configuration file
+app.config.from_object(Config)
+
+# define the database, app.db in root folder
+db = SQLAlchemy(app)
 
 # TODO - You are using Migrate. Are you sure you have to
 # also have your migrations inside the repo?
 migrate = Migrate(app, db)
-login = LoginManager(app)            # starting the login validation process
-login.login_view = 'login'           # the LoginManager, named login now, manage the view for user not yet logged in, so they redirect to login page and back after the succesful log, the name 'login' is entering in a url_for
+
+# starting the login validation process
+login = LoginManager(app)            
+
+# the LoginManager, named login now, 
+# manage the view for user not yet logged in,
+#  so they redirect to login page and back after
+#  the succesful log, the name 'login' is entering in a url_for
+login.login_view = 'login'
+
+
+bootstrap = Bootstrap(app)
 
 if not app.debug:
     # TODO - Let's leave for now the mail server.
@@ -57,4 +67,5 @@ if not app.debug:
     # TODO - No need of this for REST
     app.logger.info('ProgDay startup')
 
-from app import routes, models, errors               # import the main navigation control for the app
+# import the main navigation control for the app
+from app import routes, models, errors
