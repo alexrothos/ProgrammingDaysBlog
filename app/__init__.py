@@ -26,7 +26,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # starting the login validation process
-login = LoginManager(app)            
+login = LoginManager(app)
 
 # the LoginManager, named login now, 
 # manage the view for user not yet logged in,
@@ -66,6 +66,10 @@ if not app.debug:
 
     # TODO - No need of this for REST
     app.logger.info('ProgDay startup')
+
+# defining the errors blueprint
+from app.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
 
 # import the main navigation control for the app
 from app import routes, models, errors

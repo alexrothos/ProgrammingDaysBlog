@@ -1,5 +1,9 @@
 from flask import Blueprint
 
+# creation of Blueprint class with the
+# folder definition 'errors'
 bp = Blueprint('errors', __name__)
 
-from app.errors import error_handlers
+# this line loads to app the classes handlers.py
+# has for error managing
+from app.errors import handlers
