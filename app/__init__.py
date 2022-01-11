@@ -1,4 +1,5 @@
 from flask import Flask
+from app.auth import routes
 
 from config import Config
 
@@ -71,5 +72,9 @@ if not app.debug:
 from app.errors import bp as errors_bp
 app.register_blueprint(errors_bp)
 
+# defining the auth blueprint
+from app.auth import bp as auth_bp
+app.register_blueprint(auth_bp, url_prefix='/auth')
+
 # import the main navigation control for the app
-from app import routes, models, errors
+from app import models
