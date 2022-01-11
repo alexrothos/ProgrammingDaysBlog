@@ -1,5 +1,4 @@
 from flask import Flask
-from app.auth import routes
 
 from config import Config
 
