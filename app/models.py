@@ -71,10 +71,21 @@ class User(UserMixin, db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
+    title = db.Column(db.String(150), required=True)
+    body = db.Column(db.String(340))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     # TODO - ids-foreign_keys then all the other attributes
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+    # TODO create a method find_by_user_id which will select posts only for this user
+
+# TODO - create a base class - BaseModel which will be inherited by all your models
+# for example class Post(BaseModel)
+# class BaseModel(db.Model):
+    # id = db.Column(db.Integer, primary_key=True) # Every model has an id you don't have to use them all the time
+
+    # @classmethod - TODO what is a class method?
+    # def find_by_id(self, id) # this will be applied to every model -> Post.find_by_id()
