@@ -1,6 +1,7 @@
 from flask import Flask
 
-from config import Config
+
+from config.config import Config
 
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -77,3 +78,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 
 # import the main navigation control for the app
 from app import models
+
+# defining the config blueprint
+from config import bp as config_bp
+app.register_blueprint(config_bp)

@@ -1,7 +1,8 @@
 A programming blog made with Flask!
 
 The project's main goal is to build a simple API 
-with some basic user interface functions.
+with some basic user interface functions. Apply
+best practices on app's stucture.
 
 As secondary goals is to aply best practices in code, 
 make use of CSS effectively and create a clean, neat
@@ -14,7 +15,7 @@ Blog main functionality:
 - Users Registration page
 
 
-Blog's secondary goals (more will be added in the procces):
+Blog's secondary goals (WIP):
 
 - Create a helpful and eye candy nav bar
 
