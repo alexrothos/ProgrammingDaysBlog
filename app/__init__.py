@@ -1,3 +1,4 @@
+from distutils.command.config import config
 from flask import Flask
 
 
@@ -68,17 +69,15 @@ if not app.debug:
     # TODO - No need of this for REST
     app.logger.info('ProgDay startup')
 
+
+from app import errors, auth
+
 # defining the errors blueprint
-from app.errors import bp as errors_bp
-app.register_blueprint(errors_bp)
+app.register_blueprint(errors.bp)
 
 # defining the auth blueprint
-from app.auth import bp as auth_bp
-app.register_blueprint(auth_bp, url_prefix='/auth')
-
-# import the main navigation control for the app
-from app import models
+app.register_blueprint(auth.bp, url_prefix='/auth')
 
 # defining the config blueprint
-from config import bp as config_bp
-app.register_blueprint(config_bp)
+import config
+app.register_blueprint(config.bp)
