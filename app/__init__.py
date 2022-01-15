@@ -1,6 +1,8 @@
+from distutils.command.config import config
 from flask import Flask
 
-from config import Config
+
+from config.config import Config
 
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -26,7 +28,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # starting the login validation process
-login = LoginManager(app)            
+login = LoginManager(app)
 
 # the LoginManager, named login now, 
 # manage the view for user not yet logged in,
@@ -67,5 +69,15 @@ if not app.debug:
     # TODO - No need of this for REST
     app.logger.info('ProgDay startup')
 
-# import the main navigation control for the app
-from app import routes, models, errors
+
+from app import errors, auth
+
+# defining the errors blueprint
+app.register_blueprint(errors.bp)
+
+# defining the auth blueprint
+app.register_blueprint(auth.bp, url_prefix='/auth')
+
+# defining the config blueprint
+import config
+app.register_blueprint(config.bp)
