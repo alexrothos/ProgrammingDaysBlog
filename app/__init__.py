@@ -1,18 +1,31 @@
-from distutils.command.config import config
 from flask import Flask
-
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from config.config import Config
 
-from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
+"""
+app/__init__.py
+    --> creates app(flask), db(sqlalchemy),
+        migrate(automatic migrations with alembic)
+    --> from app import error, auth
+        
+    **  For example if you want a route only for debugging
+        you can imported only if app.debug == True
 
-import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
+app/routes.py ****(you have to create this file)
+    inside it
+        from app import auth
+    
+    --> this goes to app/auth/__init__.py
 
-import os
+app/auth/__init__.py ****(you have to create this file)
+    inside it
+        from .auth import routes
+
+    --> this will import every method inside
+        app/auth/routes.py
+"""
 
 # creation of application
 app = Flask(__name__)
@@ -27,57 +40,4 @@ db = SQLAlchemy(app)
 # also have your migrations inside the repo?
 migrate = Migrate(app, db)
 
-# starting the login validation process
-login = LoginManager(app)
-
-# the LoginManager, named login now, 
-# manage the view for user not yet logged in,
-#  so they redirect to login page and back after
-#  the succesful log, the name 'login' is entering in a url_for
-login.login_view = 'login'
-
-
-bootstrap = Bootstrap(app)
-
-if not app.debug:
-    # TODO - Let's leave for now the mail server.
-    if app.config['MAIL_SERVER']:
-        auth = None
-        if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
-            auth = (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-        secure = None
-        if app.config('MAIL_USE_TLS'):
-            secure = ()
-        mail_handler = SMTPHandler(mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']), fromaddr='no-reply@' + app.config['MAIL_SERVER'], toaddrs=app.config['ADMINS'], subject='ProgDay Failure', credentials=auth, secure=secure)
-        mail_handler.setLevel(logging.ERROR)
-        app.logger.addHandler(mail_handler) 
-    
-    # TODO - use logging without file_handler. On production
-    # docker will handle this not flask
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/progday.log', maxBytes=10240, backupCount=10)
-    file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-
-    # TODO - Maybe the level of logging
-    # is good if it was set up according to
-    # app.debug
-    app.logger.setLevel(logging.INFO)
-
-    # TODO - No need of this for REST
-    app.logger.info('ProgDay startup')
-
-
 from app import errors, auth
-
-# defining the errors blueprint
-app.register_blueprint(errors.bp)
-
-# defining the auth blueprint
-app.register_blueprint(auth.bp, url_prefix='/auth')
-
-# defining the config blueprint
-import config
-app.register_blueprint(config.bp)
