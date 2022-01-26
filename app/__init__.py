@@ -39,5 +39,4 @@ db = SQLAlchemy(app)
 # TODO - You are using Migrate. Are you sure you have to
 # also have your migrations inside the repo?
 migrate = Migrate(app, db)
-
-from app import errors, auth
+from app import auth

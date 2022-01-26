@@ -1,10 +1,9 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
 
 from app import db
 
 
-class User(UserMixin, db.Model):
+class User(db.Model):
     # TODO - Define __schema__ class
     # TODO - Create base model and inheritt to all models
     # id is a common field for every new model. You don't
@@ -27,7 +26,7 @@ class User(UserMixin, db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), required=True)
+    title = db.Column(db.String(150))
     body = db.Column(db.String(340))
 
     def __repr__(self):

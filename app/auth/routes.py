@@ -10,7 +10,7 @@ def manage_post():
         # GET object supposed not to have a body.
         # The same with delete
         try:
-            data = request.get_data()
+            data = request.get_json()
         except Exception as e:
             return jsonify({
                 'error': True,
