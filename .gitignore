@@ -4,4 +4,5 @@ migrations
 __pycache__/
 .vscode
 .flaskenv
+.env
 app.db
