@@ -1,6 +1,6 @@
 venv
 logs
-migrations
+migrations/
 __pycache__/
 .vscode
 .flaskenv

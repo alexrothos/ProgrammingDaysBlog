@@ -8,14 +8,7 @@ from app.models import User, Post
 def index():
     return "Server is running"
 
-# this is for checking, will be deleted later...
-@app.route('/check', methods=['GET','POST','PUT','DELETE'])
-def check():
-    data_method = request.method
-    return jsonify({'request_type':data_method})
-
-@app.route('/post', methods=['POST','PUT'])
-@app.route('/post/<int:post_id>', methods=['GET','DELETE'])
+@app.route('/post', methods=['GET','POST','PUT','DELETE'])
 def manage_post():
     if request.method in ['POST', 'PUT']:
         # GET object supposed not to have a body.
@@ -40,7 +33,8 @@ def manage_post():
                 # If request is put/patch updates an existing object
                 # so you have to send an id in body
                 # TODO return error response "request failed" when post not exist
-                post_id = data.get('post_id')
+                post_id = data.get('id')
+                post_user_id = data.get('user_id')
                 post = Post.find_by_id(post_id)
                 post.title = title
                 post.body = body
@@ -74,7 +68,7 @@ def manage_post():
     # TODO add a delete method
     elif request.method == 'DELETE':
         try:
-            post_id = post_id
+            id = data.get('id')
         except Exception as e:
             return jsonify({
                 'error': True,
@@ -93,33 +87,56 @@ def manage_post():
         # TODO learn more about how to use marshmellow for making a model -> json
         # TODO you have to return a list of posts in json
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
-    if request.method is 'POST':
+    if request.method == 'POST':
         try:
             data = request.get_json()
         except Exception as e:
-            return jsonify(
-                {
+            return jsonify({
                 'error': True,
                 'code': 400,
                 'title': 'Request failed',
                 'msg': 'Bad request or lost data'
                 })
         if data:
-            id = data.get('id', None)
             username = data.get('name', None)
             email = data.get('email', None)
-            password_hash = data.get('password', None)
-            user = User(id=id, username=username, email=email, password_hash=password_hash)
-            # next is trying to commit
-        
+            user = User(username=username, email=email)
+            user.set_password(data.get('password', None))
+            try:
+                db.session.add(user)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({
+                    'error': True,
+                    'code': 400,
+                    'title': 'Request failed',
+                    'msg': str(e)
+                })
+            return jsonify({
+                'error': False,
+                'code': 200,
+                'title': 'User saved',
+                'msg': 'User saved'
+                })
         else:
             return jsonify({
                 "error": True,
                 "code": 400,
                 "title": "Request failed",
-                "msg": "Something went wrong"
+                "msg": "Data are missing or lost"
             })
+    else:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "Error in request method"
+        }) 
 
-    # TODO - Create a new user with method
+@app.route('/login', methods=['GET'])
+def login():
+    pass
+ 
