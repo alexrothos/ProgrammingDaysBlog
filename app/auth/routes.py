@@ -23,26 +23,28 @@ def manage_post():
                 'msg': 'Bad request or lost data'
             })
         if data:
-            # Gets field from body - title and body
             title = data.get('title', None)
             body = data.get('body', None)
             if request.method == 'POST':
-                # If request is post creates a new object
-                post = Post(title=title, body=body)
+                user_id = data.get('user_id', None)
+                post = Post(user_id=user_id,title=title, body=body)
             elif request.method == 'PUT':
-                # If request is put/patch updates an existing object
-                # so you have to send an id in body
-                # TODO return error response "request failed" when post not exist
-                post_id = data.get('id')
-                post_user_id = data.get('user_id')
-                post = Post.find_by_id(post_id)
+                try:
+                    post_id = data.get('id')
+                    post = Post.find_by_id(post_id)
+                except:
+                    return jsonify({
+                                    'error': True,
+                                    'code': 400,
+                                    'title': 'Request failed',
+                                    'msg': 'Post not found or post id is missing'
+                                    })
                 post.title = title
                 post.body = body
             try:
-                # always try before commiting to database
+                db.session.add(post)
                 db.session.commit()
             except Exception as e:
-                # whenever something gets wrong with save rollback (undo)
                 db.session.rollback()
                 return jsonify({
                     'error': True,
@@ -56,7 +58,6 @@ def manage_post():
                 'title': 'Post saved',
                 'msg': 'Post saved'
             })
-        # No data means something broke with the request
         else:
             return jsonify({
                 'error': True,
@@ -68,6 +69,7 @@ def manage_post():
     # TODO add a delete method
     elif request.method == 'DELETE':
         try:
+            data = request.get_json()
             id = data.get('id')
         except Exception as e:
             return jsonify({
@@ -139,4 +141,19 @@ def register():
 @app.route('/login', methods=['GET'])
 def login():
     pass
- 
+
+@app.route('/posts', methods=['GET'])
+def posts():
+    return jsonify(Post.all_posts())
+
+@app.route('/user/<username>')
+def user(username):
+    try:
+        return jsonify(User.find_user_by_name(username))
+    except:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "User not found"
+        }), 400
