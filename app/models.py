@@ -1,6 +1,7 @@
 from poplib import POP3_SSL_PORT
 from turtle import update
 from unittest import result
+from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from datetime import datetime
@@ -60,17 +61,35 @@ class Post(db.Model):
 
     # TODO create a method find_by_user_id which will select posts only for this user
     # DONE ? for this user
-    def find_by_id(self, find_id):
-        post_by_id = Post.query.filter_by(id=find_id)
-        return post_by_id
+    def find_by_id(find_id):
+        post = Post.query.filter_by(id=find_id).first()
+        result = {
+            'id':post.id,
+            'user_id':post.user_id,
+            'title':post.title,
+            'body':post.body,
+            'timestamp':post.timestamp
+        }
+        return result
 
     def find_by_user_id(self):
         posts_by_user = Post.query.filter_by(user_id=self.user_id)
         return posts_by_user
 
     def all_posts():
+        result = []
         posts = Post.query.all()
-        return {"posts":posts}
+        for post in posts:
+            {
+                "id":post.id,
+                "title":post.title,
+                "body":post.body,
+                "user_id":post.user_id,
+                "timestamp":post.timestamp
+            }
+            result.append(post)
+
+        return {"posts":result}
 
 # TODO - create a base class - BaseModel which will be inherited by all your models
 # for example class Post(BaseModel)
