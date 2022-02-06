@@ -4,6 +4,8 @@ from itsdangerous import json
 from app import app, db
 from app.models import User, Post
 
+from datetime import datetime
+
 
 @app.route('/posts', methods=['GET'])
 def posts():
@@ -42,6 +44,7 @@ def manage_post():
                                     })
                 post.title = title
                 post.body = body
+                post.timestamp = datetime.utcnow()
             try:
                 db.session.add(post)
                 db.session.commit()
@@ -106,3 +109,8 @@ def manage_post():
         posts = Post.find_by_user_id(User.id)
         # TODO learn more about how to use marshmellow for making a model -> json
         # TODO you have to return a list of posts in json
+
+@app.route('/post/<username>', methods=['GET'])
+def post_by_user(username):
+    posts = Post.find_by_user(username)
+    return jsonify(posts)

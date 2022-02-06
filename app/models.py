@@ -25,7 +25,7 @@ class User(db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, index=True, default=None)
     user_posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
@@ -43,7 +43,9 @@ class User(db.Model):
             'id':user.id,
             'username':user.username,
             'email':user.email,
-            'password':user.password_hash
+            'password':user.password_hash,
+            'created_at':user.created_at,
+            'updated_at':user.updated_at
         }
         return result
 
@@ -59,37 +61,29 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
-    # TODO create a method find_by_user_id which will select posts only for this user
-    # DONE ? for this user
-    def find_by_id(find_id):
-        post = Post.query.filter_by(id=find_id).first()
-        result = {
-            'id':post.id,
-            'user_id':post.user_id,
-            'title':post.title,
-            'body':post.body,
-            'timestamp':post.timestamp
-        }
-        return result
+    def find_by_user(username):
+        user_id = User.find_user_by_name(username)['id']
+        post_q = Post.query.filter_by(user_id=user_id).all()
+        posts = []
+        for post in post_q:
+            result = {
+                'id':post.id,
+                'user_id':post.user_id,
+                'title':post.title,
+                'body':post.body,
+                'timestamp':post.timestamp
+                }
+            posts.append(result)
+        return {'posts':posts}
 
-    def find_by_user_id(self):
-        posts_by_user = Post.query.filter_by(user_id=self.user_id)
-        return posts_by_user
+#    def find_by_user_id(self):
+#        posts_by_user = Post.query.filter_by(user_id=self.user_id)
+#        return posts_by_user
 
-    def all_posts():
-        result = []
-        posts = Post.query.all()
-        for post in posts:
-            {
-                "id":post.id,
-                "title":post.title,
-                "body":post.body,
-                "user_id":post.user_id,
-                "timestamp":post.timestamp
-            }
-            result.append(post)
+    def find_by_id(post_id):
+        post = Post.query.filter_by(id=post_id).first()
+        return post
 
-        return {"posts":result}
 
 # TODO - create a base class - BaseModel which will be inherited by all your models
 # for example class Post(BaseModel)
