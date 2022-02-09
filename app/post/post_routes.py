@@ -11,11 +11,11 @@ from datetime import datetime
 def posts():
     return jsonify(Post.all_posts())
 
-@app.route('/post', methods=['GET','POST','PUT','DELETE'])
-def manage_post():
+@app.route('/post', methods=['POST','PUT'])
+@app.route('/post/<int:id>', methods=['GET','DELETE'])
+@app.route('/post/<username>', methods=['GET'])
+def manage_post(id=None, username=None):
     if request.method in ['POST', 'PUT']:
-        # GET object supposed not to have a body.
-        # The same with delete
         try:
             data = request.get_json()
         except Exception as e:
@@ -34,13 +34,20 @@ def manage_post():
             elif request.method == 'PUT':
                 try:
                     post_id = data.get('id')
-                    post = Post.find_by_id(post_id)
                 except:
                     return jsonify({
                                     'error': True,
                                     'code': 400,
                                     'title': 'Request failed',
-                                    'msg': 'Post not found or post id is missing'
+                                    'msg': 'Id is missing'
+                                    })
+                post = Post.find_by_id(post_id)
+                if post == None:
+                    return jsonify({
+                                    'error': True,
+                                    'code': 400,
+                                    'title': 'Request failed',
+                                    'msg': 'Post not found'
                                     })
                 post.title = title
                 post.body = body
@@ -69,30 +76,33 @@ def manage_post():
                 'title': 'Request failed',
                 'msg': 'Something went wrong. Please try again later'
             })
-    # elif request.method == 'DELETE'
-    # TODO add a delete method
     elif request.method == 'DELETE':
-        try:
-            data = request.get_json()
-            id = data.get('id')
-        except Exception as e:
-            return jsonify({
-                'error': True,
-                'code': 400,
-                'title': 'Request failed',
-                'msg': 'Something went wrong, unable to delete the post'
-            }),400
         if id:
-            post_for_del = Post.find_by_id(id)
             try:
-                db.session.delete(post_for_del)
-            except:
+                post = Post.query.filter_by(id=id).first()
+                if not post:
+                    return jsonify({
+                        'error': True,
+                        'code': 400,
+                        'title': 'Request failed',
+                        'msg': 'Post not found'
+                        }),400
+                db.session.delete(post)
+                db.session.commit()
                 return jsonify({
-                'error': True,
-                'code': 400,
-                'title': 'Request failed',
-                'msg': 'Id not matching'
-            }),400
+                        'error': False,
+                        'code': 200,
+                        'title': 'Post deleted',
+                        'msg': 'Post deleted'
+                        }),200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({
+                    'error': True,
+                    'code': 400,
+                    'title': 'Request failed',
+                    'msg': e
+                    }),400
         else:
             return jsonify({
                 'error': True,
@@ -100,17 +110,42 @@ def manage_post():
                 'title': 'Request failed',
                 'msg': 'Id was missing'
             }),400
-        # post_id find in DB
-            # TODO how to find if the post_id is valid and then delete it...
+    else:
+        if id is not None:
+            post = Post.find_by_id(id)
+            if post == None:
+                    return jsonify({
+                        'error': True,
+                        'code': 400,
+                        'title': 'Post not found',
+                        'msg': 'Post not found'
+                    })
+            result = {
+                    'id':post.id,
+                    'user_id':post.user_id,
+                    'title':post.title,
+                    'body':post.body,
+                    'timestamp':post.timestamp
+                }
+            return jsonify(result)
+        elif username is not None:
+            user_check = User.query.filter_by(username=username).first()
+            if not user_check:
+                return jsonify({
+                    'error': True,
+                    'code': 400,
+                    'title': 'Request failed',
+                    'msg': 'User not found'
+                    }),400
+            posts = Post.find_by_user(username)
+            return jsonify(posts)
+        else:
+            return jsonify({
+                'error': True,
+                'code': 400,
+                'title': 'Request failed',
+                'msg': 'Post id or username is required'
+                }),400
 
-    else: # request is GET
-        # TODO find how to get a specific post with GET /post/{id}
         # TODO find how to fetch user_id from login_required
-        posts = Post.find_by_user_id(User.id)
         # TODO learn more about how to use marshmellow for making a model -> json
-        # TODO you have to return a list of posts in json
-
-@app.route('/post/<username>', methods=['GET'])
-def post_by_user(username):
-    posts = Post.find_by_user(username)
-    return jsonify(posts)

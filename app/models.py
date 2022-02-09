@@ -92,12 +92,10 @@ class Post(db.Model):
             posts.append(result)
         return {'posts':posts}
 
-#    def find_by_user_id(self):
-#        posts_by_user = Post.query.filter_by(user_id=self.user_id)
-#        return posts_by_user
-
     def find_by_id(post_id):
         post = Post.query.filter_by(id=post_id).first()
+        if not post:
+            return None
         return post
 
 
