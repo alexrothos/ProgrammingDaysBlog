@@ -6,11 +6,6 @@ from app.models import User, Post
 
 from datetime import datetime
 
-
-@app.route('/posts', methods=['GET'])
-def posts():
-    return jsonify(Post.all_posts())
-
 @app.route('/post', methods=['POST','PUT'])
 @app.route('/post/<int:id>', methods=['GET','DELETE'])
 @app.route('/post/<username>', methods=['GET'])
