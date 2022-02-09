@@ -4,7 +4,7 @@ from flask import request, jsonify
 from itsdangerous import json
 
 from app import app, db
-from app.models import User, Post
+from app.models import User
 
 @app.route('/')
 def index():
@@ -79,7 +79,7 @@ def user_update():
                 'title':'Request failed',
                 'msg':'Username is missing'
             })
-    user = User.find_user_by_name(username)
+    user = User.query.filter_by(username=username).first()
     if user:
         user.email = data.get('email')
         user.password = generate_password_hash(data.get('password'))
@@ -109,13 +109,8 @@ def user_update():
                 'msg':'User not found'
             })
 
-
-@app.route('/login', methods=['GET'])
-def login():
-    pass
-
-@app.route('/user/<username>')
-def user(username):
+@app.route('/user/by_name/<username>')
+def user_by_name(username):
     user = User.find_user_by_name(username=username)
     if not user:
         return jsonify({
@@ -133,3 +128,51 @@ def user(username):
             "title": "Wrong in JSON file",
             "msg": str(e)
         }), 400
+
+@app.route('/user/by_id/<int:id>')
+def user_by_id(id):
+    user = User.find_user_by_id(id=id)
+    if not user:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "User not found"
+        }), 400
+    try:
+        return jsonify(user)
+    except Exception as e:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Wrong in JSON file",
+            "msg": str(e)
+        }), 400
+
+@app.route('/user/delete/<username>', methods=['DELETE'])
+def delete_user(username):
+    user = User.find_user_by_name(username=username)
+    if not user:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "User not found"
+        }), 400
+    try:
+        User.query.filter_by(username=username).delete()
+        db.session.commit()
+        return jsonify({
+                'error': False,
+                'code': 200,
+                'title': 'User deleted',
+                'msg': 'User deleted'
+            }),200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+                    'error': True,
+                    'code': 400,
+                    'title': 'Request failed',
+                    'msg': str(e)
+                }), 400

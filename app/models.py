@@ -39,6 +39,22 @@ class User(db.Model):
     
     def find_user_by_name(username):
         user = User.query.filter_by(username=username).first()
+        if not user:
+            return None
+        result = {
+            'id':user.id,
+            'username':user.username,
+            'email':user.email,
+            'password':user.password_hash,
+            'created_at':user.created_at,
+            'updated_at':user.updated_at
+        }
+        return result
+    
+    def find_user_by_id(id):
+        user = User.query.filter_by(id=id).first()
+        if not user:
+            return None
         result = {
             'id':user.id,
             'username':user.username,
