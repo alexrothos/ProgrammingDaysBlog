@@ -8,8 +8,15 @@ from datetime import datetime
 
 from app import db
 
-#class BaseModel(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
+class BaseModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    def find_by_id(self):
+        pass
+
+    def find_by_name(self):
+        pass
+    
     # TODO - Define __schema__ class
     # TODO - Create base model and inheritt to all models
     # id is a common field for every new model. You don't

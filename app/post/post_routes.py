@@ -6,9 +6,9 @@ from app.models import User, Post
 
 from datetime import datetime
 
-@app.route('/post', methods=['POST','PUT'])
-@app.route('/post/<int:id>', methods=['GET','DELETE'])
-@app.route('/post/<username>', methods=['GET'])
+@app.route('/post', methods=['POST'])
+@app.route('/post/<int:id>', methods=['GET', 'PUT','DELETE'])
+@app.route('/post/<string:username>', methods=['GET'])
 def manage_post(id=None, username=None):
     if request.method in ['POST', 'PUT']:
         try:
@@ -18,7 +18,7 @@ def manage_post(id=None, username=None):
                 'error': True,
                 'code': 400,
                 'title': 'Request failed',
-                'msg': 'Bad request or lost data'
+                'msg': e
             })
         if data:
             title = data.get('title', None)
@@ -28,7 +28,7 @@ def manage_post(id=None, username=None):
                 post = Post(user_id=user_id,title=title, body=body)
             elif request.method == 'PUT':
                 try:
-                    post_id = data.get('id')
+                    post_id = id
                 except:
                     return jsonify({
                                     'error': True,

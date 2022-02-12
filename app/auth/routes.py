@@ -109,9 +109,13 @@ def user_update():
                 'msg':'User not found'
             })
 
-@app.route('/user/by_name/<username>')
-def user_by_name(username):
-    user = User.find_user_by_name(username=username)
+@app.route('/user/<username>', methods=['GET','PUT','DELETE'])
+@app.route('/user/<int:id>', methods=['GET','PUT','DELETE'])
+def user_by_name(id=None,username=None):
+    if username:
+        user = User.find_user_by_name(username=username)
+    elif id:
+        user = User.find_user_by_id(id=id)
     if not user:
         return jsonify({
             "error": True,
@@ -119,60 +123,34 @@ def user_by_name(username):
             "title": "Request failed",
             "msg": "User not found"
         }), 400
-    try:
-        return jsonify(user)
-    except Exception as e:
-        return jsonify({
-            "error": True,
-            "code": 400,
-            "title": "Wrong in JSON file",
-            "msg": str(e)
-        }), 400
-
-@app.route('/user/by_id/<int:id>')
-def user_by_id(id):
-    user = User.find_user_by_id(id=id)
-    if not user:
-        return jsonify({
-            "error": True,
-            "code": 400,
-            "title": "Request failed",
-            "msg": "User not found"
-        }), 400
-    try:
-        return jsonify(user)
-    except Exception as e:
-        return jsonify({
-            "error": True,
-            "code": 400,
-            "title": "Wrong in JSON file",
-            "msg": str(e)
-        }), 400
-
-@app.route('/user/delete/<username>', methods=['DELETE'])
-def delete_user(username):
-    user = User.find_user_by_name(username=username)
-    if not user:
-        return jsonify({
-            "error": True,
-            "code": 400,
-            "title": "Request failed",
-            "msg": "User not found"
-        }), 400
-    try:
-        User.query.filter_by(username=username).delete()
-        db.session.commit()
-        return jsonify({
-                'error': False,
-                'code': 200,
-                'title': 'User deleted',
-                'msg': 'User deleted'
-            }),200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-                    'error': True,
-                    'code': 400,
-                    'title': 'Request failed',
-                    'msg': str(e)
-                }), 400
+    if request.method == 'GET':
+        try:
+            return jsonify(user)
+        except Exception as e:
+            return jsonify({
+                "error": True,
+                "code": 400,
+                "title": "Error in JSON file",
+                "msg": str(e)
+            }), 400
+    if request.method == 'DELETE':
+        try:
+            if username:
+                User.query.filter_by(username=username).delete()
+            elif id:
+                User.query.filter_by(id=id).delete()
+            db.session.commit()
+            return jsonify({
+                    'error': False,
+                    'code': 200,
+                    'title': 'User deleted',
+                    'msg': 'User deleted'
+                }),200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                        'error': True,
+                        'code': 400,
+                        'title': 'Request failed',
+                        'msg': str(e)
+                    }), 400
