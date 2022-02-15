@@ -6,9 +6,9 @@ from app.models import User, Post
 
 from datetime import datetime
 
-@app.route('/post', methods=['POST'])
-@app.route('/post/<int:id>', methods=['GET', 'PUT','DELETE'])
-@app.route('/post/<string:username>', methods=['GET'])
+@app.route('/post/', methods=['POST'])
+@app.route('/post/<int:id>/', methods=['GET', 'PUT','DELETE'])
+@app.route('/post/<string:username>/', methods=['GET'])
 def manage_post(id=None, username=None):
     if request.method in ['POST', 'PUT']:
         try:

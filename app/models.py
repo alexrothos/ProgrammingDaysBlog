@@ -32,7 +32,7 @@ class User(db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, index=True, default=None)
+    updated_at = db.Column(db.DateTime, index=True)
     user_posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
@@ -109,7 +109,7 @@ class Post(db.Model):
 # TODO - create a base class - BaseModel which will be inherited by all your models
 # for example class Post(BaseModel)
 # class BaseModel(db.Model):
-    # id = db.Column(db.Integer, primary_key=True) # Every model has an id you don't have to use them all the time
+# # id = db.Column(db.Integer, primary_key=True) # Every model has an id you don't have to use them all the time
 
-    # @classmethod - TODO what is a class method?
-    # def find_by_id(self, id) # this will be applied to every model -> Post.find_by_id()
+# @classmethod - TODO what is a class method?
+# def find_by_id(self, id) # this will be applied to every model -> Post.find_by_id()
