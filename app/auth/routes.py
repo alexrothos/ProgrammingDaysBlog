@@ -59,56 +59,6 @@ def register():
             "msg": "Error in request method"
         }), 400
 
-@app.route('/user_update', methods=['PUT'])
-def user_update():
-    try:
-        data = request.get_json()
-    except Exception as e:
-        return jsonify({
-            'error': True,
-            'code': 400,
-            'title': 'Request failed',
-            'msg': 'Bad request or lost data'
-            }), 400
-    try:
-        username = data.get('username')
-    except:
-        return jsonify({
-                'error':True,
-                'code': 400,
-                'title':'Request failed',
-                'msg':'Username is missing'
-            })
-    user = User.query.filter_by(username=username).first()
-    if user:
-        user.email = data.get('email')
-        user.password = generate_password_hash(data.get('password'))
-        user.update_at = datetime.utcnow()
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({
-                    'error': True,
-                    'code': 400,
-                    'title': 'Request failed',
-                    'msg': str(e)
-                }), 400
-        return jsonify({
-                'error': False,
-                'code': 200,
-                'title': 'User updated',
-                'msg': 'User updated'
-            }),200
-    else:
-        return jsonify({
-                'error':True,
-                'code': 400,
-                'title':'Request failed',
-                'msg':'User not found'
-            })
-
 @app.route('/user/<username>/', methods=['GET','PUT','DELETE'])
 @app.route('/user/<int:id>/', methods=['GET','PUT','DELETE'])
 def user_by_name(id=None,username=None):
