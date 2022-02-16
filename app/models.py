@@ -72,6 +72,7 @@ class User(db.Model):
         }
         return result
 
+
 class Post(db.Model):
     __tablename__ = 'post'
 
