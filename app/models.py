@@ -1,12 +1,10 @@
-from poplib import POP3_SSL_PORT
-from turtle import update
-from unittest import result
-from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from datetime import datetime
 
-from app import db
+from flask_login import UserMixin
+
+from app import db, login
 
 class BaseModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,7 +22,7 @@ class BaseModel(db.Model):
 
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +69,10 @@ class User(db.Model):
             'updated_at':user.updated_at
         }
         return result
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 class Post(db.Model):

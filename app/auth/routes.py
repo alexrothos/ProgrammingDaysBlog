@@ -1,7 +1,9 @@
 from datetime import datetime
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, jsonify
 from itsdangerous import json
+
+from flask_login import current_user, login_user
 
 from app import app, db
 from app.models import User
@@ -58,6 +60,53 @@ def register():
             "title": "Request failed",
             "msg": "Error in request method"
         }), 400
+
+@app.route('/login/', methods=['POST'])
+def login():
+    if current_user.is_authenticated:
+        return jsonify({
+                    'error': False,
+                    'code': 200,
+                    'title': 'User is authenticated',
+                    'msg': 'User is authenticated'
+                }),200
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify({
+            'error': True,
+            'code': 400,
+            'title': 'Request failed',
+            'msg': str(e)
+            }), 400
+    user = User.find_user_by_name(username=data['username'])
+    if not user:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "User not found"
+            }), 400
+    if not check_password_hash(user['password'],data['password']):
+        return jsonify({
+            'error': True,
+            'code': 400,
+            'title': 'Invalid password',
+            'msg': 'Password was wrong'
+            }), 400
+    else:
+        try:
+            login_user(user)
+            return jsonify({
+                'error': False,
+                'code': 200,
+                'title': 'Login in succesful',
+                'msg': 'User is logged in'
+                }), 200
+        except Exception as e:
+            return str(e)
+
+
 
 @app.route('/user/<username>/', methods=['GET','PUT','DELETE'])
 @app.route('/user/<int:id>/', methods=['GET','PUT','DELETE'])

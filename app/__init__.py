@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_jwt import JWT
+from flask_login import LoginManager
 
 from config.config import Config
 
@@ -36,11 +36,10 @@ app = Flask(__name__)
 # connection with the configuration file
 app.config.from_object(Config)
 
+login = LoginManager(app)
+
 # define the database, app.db in root folder
 db = SQLAlchemy(app)
-
-from app.auth.security import authenticate, identity
-jwt = JWT(app, authenticate, identity)
 
 # TODO - You are using Migrate. Are you sure you have to
 # also have your migrations inside the repo?
