@@ -1,6 +1,8 @@
 from flask import request, jsonify
 from itsdangerous import json
 
+from flask_login import login_required
+
 from app import app, db
 from app.models import User, Post
 
@@ -9,6 +11,7 @@ from datetime import datetime
 @app.route('/post/', methods=['POST'])
 @app.route('/post/<int:id>/', methods=['GET', 'PUT','DELETE'])
 @app.route('/post/<string:username>/', methods=['GET'])
+@login_required
 def manage_post(id=None, username=None):
     if request.method in ['POST', 'PUT']:
         try:

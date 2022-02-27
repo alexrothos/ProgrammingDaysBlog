@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, jsonify
 from itsdangerous import json
 
-from flask_login import current_user, login_user
+from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, db
 from app.models import User
@@ -79,7 +79,7 @@ def login():
             'title': 'Request failed',
             'msg': str(e)
             }), 400
-    user = User.find_user_by_name(username=data['username'])
+    user = User.query.filter_by(username=data['username']).first()
     if not user:
         return jsonify({
             "error": True,
@@ -87,7 +87,7 @@ def login():
             "title": "Request failed",
             "msg": "User not found"
             }), 400
-    if not check_password_hash(user['password'],data['password']):
+    if not check_password_hash(user.password_hash, data['password']):
         return jsonify({
             'error': True,
             'code': 400,
@@ -95,17 +95,23 @@ def login():
             'msg': 'Password was wrong'
             }), 400
     else:
-        try:
-            login_user(user)
-            return jsonify({
-                'error': False,
-                'code': 200,
-                'title': 'Login in succesful',
-                'msg': 'User is logged in'
-                }), 200
-        except Exception as e:
-            return str(e)
+        login_user(user)
+        return jsonify({
+            'error': False,
+            'code': 200,
+            'title': 'Login in succesful',
+            'msg': 'User is logged in'
+            }), 200
 
+@app.route('/logout/')
+def logout():
+    logout_user()
+    return jsonify({
+            'error': False,
+            'code': 200,
+            'title': 'Logout succesful',
+            'msg': 'User is logged out'
+            }), 200
 
 
 @app.route('/user/<username>/', methods=['GET','PUT','DELETE'])
