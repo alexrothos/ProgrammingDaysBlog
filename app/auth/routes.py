@@ -1,7 +1,6 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, jsonify
-from itsdangerous import json
 
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -79,7 +78,15 @@ def login():
             'title': 'Request failed',
             'msg': str(e)
             }), 400
-    user = User.query.filter_by(username=data['username']).first()
+    username = data.get("username", None)
+    if not username:
+        return jsonify({
+            "error": True,
+            "code": 400,
+            "title": "Request failed",
+            "msg": "Username not found"
+            }), 400
+    user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({
             "error": True,

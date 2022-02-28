@@ -14,7 +14,27 @@ class BaseModel(db.Model):
 
     def find_by_name(self):
         pass
-    
+
+    def find_user_by_id(id):
+        user = User.query.filter_by(id=id).first()
+        if not user:
+            return None
+        result = {
+            'id':user.id,
+            'username':user.username,
+            'email':user.email,
+            'password':user.password_hash,
+            'created_at':user.created_at,
+            'updated_at':user.updated_at
+        }
+        return result
+
+    def find_by_id(id):
+        result = Post.query.filter_by(id=id).first()
+        if not result:
+            return None
+        return result
+
     # TODO - Define __schema__ class
     # TODO - Create base model and inheritt to all models
     # id is a common field for every new model. You don't

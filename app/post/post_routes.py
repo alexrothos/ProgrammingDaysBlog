@@ -1,5 +1,4 @@
 from flask import request, jsonify
-from itsdangerous import json
 
 from flask_login import login_required
 
