@@ -9,27 +9,7 @@ from app import db, login
 class BaseModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    def find_by_id(self):
-        pass
-
-    def find_by_name(self):
-        pass
-
-    def find_user_by_id(id):
-        user = User.query.filter_by(id=id).first()
-        if not user:
-            return None
-        result = {
-            'id':user.id,
-            'username':user.username,
-            'email':user.email,
-            'password':user.password_hash,
-            'created_at':user.created_at,
-            'updated_at':user.updated_at
-        }
-        return result
-
-    def find_by_id(id):
+    def find_by_id(self, id):
         result = Post.query.filter_by(id=id).first()
         if not result:
             return None
@@ -43,9 +23,9 @@ class BaseModel(db.Model):
 
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'user_table'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)    
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
@@ -96,10 +76,10 @@ def load_user(id):
 
 
 class Post(db.Model):
-    __tablename__ = 'post'
+    __tablename__ = 'post_table'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'))
     title = db.Column(db.String(150))
     body = db.Column(db.String(340))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
