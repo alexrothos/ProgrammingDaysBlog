@@ -6,14 +6,16 @@ from flask_login import UserMixin
 
 from app import db, login
 
-class BaseModel(db.Model):
+class BaseModel(UserMixin, db.Model):
+    __abstract__ = True
+
     id = db.Column(db.Integer, primary_key=True)
 
-    def find_by_id(self, id):
-        result = Post.query.filter_by(id=id).first()
-        if not result:
-            return None
-        return result
+#    def find_by_id(self, id):
+#       result = Post.query.filter_by(id=id).first()
+#        if not result:
+#            return None
+#        return result
 
     # TODO - Define __schema__ class
     # TODO - Create base model and inheritt to all models
@@ -22,16 +24,16 @@ class BaseModel(db.Model):
 
 
 
-class User(UserMixin, db.Model):
+class User(BaseModel):
     __tablename__ = 'user_table'
 
-    id = db.Column(db.Integer, primary_key=True)    
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
+#    id = db.Column(db.Integer, primary_key=True)    
+    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, index=True)
-    user_posts = db.relationship('Post', backref='author', lazy='dynamic')
+    user_posts = db.relationship('Post', backref='user_table', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -75,10 +77,10 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-class Post(db.Model):
+class Post(BaseModel):
     __tablename__ = 'post_table'
 
-    id = db.Column(db.Integer, primary_key=True)
+#    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'))
     title = db.Column(db.String(150))
     body = db.Column(db.String(340))
@@ -107,12 +109,6 @@ class Post(db.Model):
         if not post:
             return None
         return post
-
-
-# TODO - create a base class - BaseModel which will be inherited by all your models
-# for example class Post(BaseModel)
-# class BaseModel(db.Model):
-# # id = db.Column(db.Integer, primary_key=True) # Every model has an id you don't have to use them all the time
 
 # @classmethod - TODO what is a class method?
 # def find_by_id(self, id) # this will be applied to every model -> Post.find_by_id()
