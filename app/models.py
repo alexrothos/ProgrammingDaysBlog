@@ -33,7 +33,7 @@ class User(BaseModel):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, index=True)
-    user_posts = db.relationship('Post', backref='user_table', lazy='dynamic')
+    user_posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

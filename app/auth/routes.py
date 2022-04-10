@@ -5,7 +5,7 @@ from flask import request, jsonify
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, db
-from app.models import User
+from app.models import User, Post
 
 @app.route('/')
 def index():
@@ -147,6 +147,7 @@ def user_by_name(id=None,username=None):
             }), 400
     if request.method == 'DELETE':
         try:
+            Post.query.filter_by(user_id=user['id']).delete()
             User.query.filter_by(id=user['id']).delete()
             db.session.commit()
             return jsonify({
