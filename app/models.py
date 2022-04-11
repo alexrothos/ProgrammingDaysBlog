@@ -66,7 +66,7 @@ def load_user(id):
 class Post(BaseModel):
     __tablename__ = 'post_table'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'), on_delete)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'))
     title = db.Column(db.String(150))
     body = db.Column(db.String(340))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
