@@ -6,34 +6,33 @@ from flask_login import UserMixin
 
 from app import db, login
 
-class BaseModel(UserMixin, db.Model):
+
+class BaseModel(db.Model):
     __abstract__ = True
 
     id = db.Column(db.Integer, primary_key=True)
 
-#    def find_by_id(self, id):
-#       result = Post.query.filter_by(id=id).first()
-#        if not result:
-#            return None
-#        return result
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
 
-    # TODO - Define __schema__ class
-    # TODO - Create base model and inheritt to all models
-    # id is a common field for every new model. You don't
-    # have to create it every time.
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
 
 
-
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     __tablename__ = 'user_table'
 
-#    id = db.Column(db.Integer, primary_key=True)    
     username = db.Column(db.String(64), index=True, unique=True, nullable=False)
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, index=True)
-    user_posts = db.relationship('Post', backref='author', lazy='dynamic')
+    updated_at = db.Column(db.DateTime, default=db.func.now(), server_onupdate=db.func.now())
+    user_posts = db.relationship('Post', cascade="all,delete", backref='author', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -44,33 +43,20 @@ class User(BaseModel):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    def find_user_by_name(username):
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            return None
-        result = {
-            'id':user.id,
-            'username':user.username,
-            'email':user.email,
-            'password':user.password_hash,
-            'created_at':user.created_at,
-            'updated_at':user.updated_at
+    @classmethod
+    def find_by_name(cls, _username):
+        return cls.query.filter_by(username=_username).first()
+        
+    def serialize(self):
+        return {
+            'id':self.id,
+            'username':self.username,
+            'email':self.email,
+            'password':self.password_hash,
+            'created_at':self.created_at,
+            'updated_at':self.updated_at
         }
-        return result
-    
-    def find_user_by_id(id):
-        user = User.query.filter_by(id=id).first()
-        if not user:
-            return None
-        result = {
-            'id':user.id,
-            'username':user.username,
-            'email':user.email,
-            'password':user.password_hash,
-            'created_at':user.created_at,
-            'updated_at':user.updated_at
-        }
-        return result
+
 
 @login.user_loader
 def load_user(id):
@@ -80,8 +66,7 @@ def load_user(id):
 class Post(BaseModel):
     __tablename__ = 'post_table'
 
-#    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user_table.id'), on_delete)
     title = db.Column(db.String(150))
     body = db.Column(db.String(340))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -89,26 +74,18 @@ class Post(BaseModel):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
-    def find_by_user(username):
-        user_id = User.find_user_by_name(username)['id']
-        post_q = Post.query.filter_by(user_id=user_id).all()
-        posts = []
-        for post in post_q:
-            result = {
-                'id':post.id,
-                'user_id':post.user_id,
-                'title':post.title,
-                'body':post.body,
-                'timestamp':post.timestamp
-                }
-            posts.append(result)
-        return {'posts':posts}
+    @classmethod
+    def find_by_user_id(cls, _user_id):
+        return cls.query.filter_by(user_id=_user_id).all()
 
-    def find_by_id(post_id):
-        post = Post.query.filter_by(id=post_id).first()
-        if not post:
-            return None
-        return post
+    def serialize(self):
+        return {
+            'id':self.id,
+            'user_id':self.user_id,
+            'title':self.title,
+            'body':self.body,
+            'timestamp':self.timestamp
+        }
 
 # @classmethod - TODO what is a class method?
 # def find_by_id(self, id) # this will be applied to every model -> Post.find_by_id()

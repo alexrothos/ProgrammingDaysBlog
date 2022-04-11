@@ -125,9 +125,9 @@ def logout():
 @app.route('/user/<int:id>/', methods=['GET','PUT','DELETE'])
 def user_by_name(id=None,username=None):
     if username:
-        user = User.find_user_by_name(username=username)
+        user = User.find_by_name(username)
     elif id:
-        user = User.find_user_by_id(id=id)
+        user = User.find_by_id(id)
     if not user:
         return jsonify({
             "error": True,
@@ -137,7 +137,7 @@ def user_by_name(id=None,username=None):
         }), 400
     if request.method == 'GET':
         try:
-            return jsonify(user)
+            return jsonify(user.serialize())
         except Exception as e:
             return jsonify({
                 "error": True,
@@ -147,8 +147,7 @@ def user_by_name(id=None,username=None):
             }), 400
     if request.method == 'DELETE':
         try:
-            Post.query.filter_by(user_id=user['id']).delete()
-            User.query.filter_by(id=user['id']).delete()
+            user.delete()
             db.session.commit()
             return jsonify({
                     'error': False,
@@ -174,25 +173,33 @@ def user_by_name(id=None,username=None):
                 'title': 'Request failed',
                 'msg': 'Bad request or lost data'
                 }), 400
-        user = User.query.filter_by(id=user['id']).first()
-        user.username = data.get('username')
-        user.email = data.get('email')
-        user.password = generate_password_hash(data.get('password'))
-        user.updated_at = datetime.utcnow()
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({
+        user_id = data.get("id", None)
+        user = User.find_by_id(user_id)
+        if user:
+            user.username = data.get('username')
+            user.email = data.get('email')
+            user.password = generate_password_hash(data.get('password'))
+            try:
+                db.session.add(user)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({
                     'error': True,
                     'code': 400,
                     'title': 'Request failed',
                     'msg': str(e)
                 }), 400
-        return jsonify({
+            return jsonify({
                 'error': False,
                 'code': 200,
                 'title': 'User updated',
                 'msg': 'User updated'
+            }),200
+        else:
+            return jsonify({
+                'error': True,
+                'code': 400,
+                'title': 'User not found',
+                'msg': 'User not found'
             }),200

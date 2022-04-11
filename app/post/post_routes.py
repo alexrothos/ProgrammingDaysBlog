@@ -5,13 +5,12 @@ from flask_login import login_required
 from app import app, db
 from app.models import User, Post
 
-from datetime import datetime
 
 @app.route('/post/', methods=['POST'])
 @app.route('/post/<int:id>/', methods=['GET', 'PUT','DELETE'])
 @app.route('/post/<string:username>/', methods=['GET'])
 @login_required
-def manage_post(id=None, username=None):
+def manage_post(post_id=None, username=None):
     if request.method in ['POST', 'PUT']:
         try:
             data = request.get_json()
@@ -29,29 +28,25 @@ def manage_post(id=None, username=None):
                 user_id = data.get('user_id', None)
                 post = Post(user_id=user_id,title=title, body=body)
             elif request.method == 'PUT':
-                try:
-                    post_id = id
-                except:
+                if not post_id:
                     return jsonify({
-                                    'error': True,
-                                    'code': 400,
-                                    'title': 'Request failed',
-                                    'msg': 'Id is missing'
-                                    })
+                        'error': True,
+                        'code': 400,
+                        'title': 'Request failed',
+                        'msg': 'Id is missing'
+                    })
                 post = Post.find_by_id(post_id)
-                if post == None:
+                if not post:
                     return jsonify({
-                                    'error': True,
-                                    'code': 400,
-                                    'title': 'Request failed',
-                                    'msg': 'Post not found'
-                                    })
+                        'error': True,
+                        'code': 400,
+                        'title': 'Request failed',
+                        'msg': 'Post not found'
+                    })
                 post.title = title
                 post.body = body
-                post.timestamp = datetime.utcnow()
             try:
-                db.session.add(post)
-                db.session.commit()
+                post.save()
             except Exception as e:
                 db.session.rollback()
                 return jsonify({
@@ -84,8 +79,7 @@ def manage_post(id=None, username=None):
                         'title': 'Request failed',
                         'msg': 'Post not found'
                         }),400
-                db.session.delete(post)
-                db.session.commit()
+                post.delete_from_db()
                 return jsonify({
                         'error': False,
                         'code': 200,
@@ -108,34 +102,28 @@ def manage_post(id=None, username=None):
                 'msg': 'Id was missing'
             }),400
     else:
-        if id is not None:
-            post = Post.find_by_id(id)
-            if post == None:
-                    return jsonify({
-                        'error': True,
-                        'code': 400,
-                        'title': 'Post not found',
-                        'msg': 'Post not found'
-                    })
-            result = {
-                    'id':post.id,
-                    'user_id':post.user_id,
-                    'title':post.title,
-                    'body':post.body,
-                    'timestamp':post.timestamp
-                }
-            return jsonify(result)
-        elif username is not None:
-            user_check = User.query.filter_by(username=username).first()
-            if not user_check:
+        if post_id:
+            post = Post.find_by_id(post_id)
+            if not post:
+                return jsonify({
+                    'error': True,
+                    'code': 400,
+                    'title': 'Post not found',
+                    'msg': 'Post not found'
+                })
+            return jsonify(post.serialize())
+        elif username:
+            user = User.find_by_name(username)
+            if not user:
                 return jsonify({
                     'error': True,
                     'code': 400,
                     'title': 'Request failed',
                     'msg': 'User not found'
                     }),400
-            posts = Post.find_by_user(username)
-            return jsonify(posts)
+            posts = Post.find_by_user_id(user_id)
+            serialized_posts = [post.serialize() for post in posts]
+            return jsonify(serialized_posts)
         else:
             return jsonify({
                 'error': True,
