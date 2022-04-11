@@ -29,8 +29,7 @@ def register():
             user = User(username=username, email=email)
             user.set_password(data.get('password', None))
             try:
-                db.session.add(user)
-                db.session.commit()
+                user.save_to_db()
             except Exception as e:
                 db.session.rollback()
                 return jsonify({
@@ -86,7 +85,7 @@ def login():
             "title": "Request failed",
             "msg": "Username not found"
             }), 400
-    user = User.query.filter_by(username=username).first()
+    user = User.find_by_name(username)
     if not user:
         return jsonify({
             "error": True,
@@ -148,7 +147,6 @@ def user_by_name(id=None,username=None):
     if request.method == 'DELETE':
         try:
             user.delete()
-            db.session.commit()
             return jsonify({
                     'error': False,
                     'code': 200,
@@ -180,8 +178,7 @@ def user_by_name(id=None,username=None):
             user.email = data.get('email')
             user.password = generate_password_hash(data.get('password'))
             try:
-                db.session.add(user)
-                db.session.commit()
+                user.save_to_db()
             except Exception as e:
                 db.session.rollback()
                 return jsonify({
