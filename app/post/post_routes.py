@@ -7,7 +7,7 @@ from app.models import User, Post
 
 
 @app.route('/post/', methods=['POST'])
-@app.route('/post/<int:id>/', methods=['GET', 'PUT','DELETE'])
+@app.route('/post/<int:post_id>/', methods=['GET', 'PUT','DELETE'])
 @app.route('/post/<string:username>/', methods=['GET'])
 @login_required
 def manage_post(post_id=None, username=None):
@@ -46,7 +46,7 @@ def manage_post(post_id=None, username=None):
                 post.title = title
                 post.body = body
             try:
-                post.save()
+                post.save_to_db()
             except Exception as e:
                 db.session.rollback()
                 return jsonify({
@@ -121,8 +121,8 @@ def manage_post(post_id=None, username=None):
                     'title': 'Request failed',
                     'msg': 'User not found'
                     }),400
-            posts = Post.find_by_user_id(user_id)
-            serialized_posts = [post.serialize() for post in posts]
+            posts = Post.find_by_user_id(user.id)
+            serialized_posts = [Post.serialize() for post in posts]
             return jsonify(serialized_posts)
         else:
             return jsonify({
