@@ -1,8 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
 
 from config.config import Config
+
+
 
 """
 app/__init__.py
@@ -32,6 +35,8 @@ app = Flask(__name__)
 
 # connection with the configuration file
 app.config.from_object(Config)
+
+login = LoginManager(app)
 
 # define the database, app.db in root folder
 db = SQLAlchemy(app)
