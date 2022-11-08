@@ -9,7 +9,7 @@ importlib-metadata==4.11.2
 importlib-resources==5.4.0
 itsdangerous==2.1.0
 Jinja2==3.0.3
-Mako==1.1.6
+Mako==1.2.2
 MarkupSafe==2.1.0
 python-dotenv==0.19.2
 SQLAlchemy==1.4.31
